@@ -1,4 +1,3 @@
-(function(){
 	var jankenImg = $('#janken');
 	var startButton = $('#start-button');
 	var resetButton = $('#reset-button');
@@ -20,13 +19,19 @@
 	// init number list and storage
 	var numberListAll = [1,2,3];
 
-	var storage = localStorage;
 	var resultKey = 'janken.resultlist';
 	var setResultList = function(a) {
-		storage.setItem(resultKey, JSON.stringify(a));
+		try {
+			localStorage.setItem(resultKey, JSON.stringify(a));
+		} catch(e) {
+		}
 	};
 	var getResultList = function() {
-		return JSON.parse(storage.getItem(resultKey));
+		try {
+			return JSON.parse(localStorage.getItem(resultKey));
+		} catch(e) {
+			return [];
+		}
 	};
 	var resetLists = function() {
 		setResultList([]);
@@ -95,5 +100,3 @@
 		}
 	};
 	resetButton.click(resetClicked);
-	
-})();
