@@ -1,8 +1,11 @@
-	var jankenImg = $('#janken');
-	var startButton = $('#start-button');
-	var resetButton = $('#reset-button');
+$(function(){
 	var resultsDiv = $('#results');
-	
+
+	var isStarted = false;
+	var isStopAnim = false;
+	var resultParam = null;
+
+	// result function
 	var toJankenSrc = function(n) {
 		switch(n) {
 			case 2:
@@ -15,10 +18,89 @@
 	var addResult = function(i,n) {
 		resultsDiv.append('<div><span class="uk-label uk-label-success">' + i + '</span><img class="uk-align-center" data-src="' + toJankenSrc(n) + '" width="145" height="135" alt="" uk-img></div>');
 	};
+  
+	// roulett function
+	var option = {
+		speed : 10,
+		duration : 300,
+		stopImageNumber : -1,// ramdom
+		startCallback : function() {
+			console.log('start');
+		},
+		slowDownCallback : function() {
+			console.log('slowDown');
+		},
+		stopCallback : function($stopElm) {
+			resultParam = $stopElm.data('number');
+			console.log('result %s',resultParam);
+			stopEnd();
+		}
+	}
+	var rouletter = $('div.roulette');
+	rouletter.roulette(option);	
 	
-	// init number list and storage
-	var numberListAll = [1,2,3];
+	// initialize
+	var resultKey = 'janken.resultlist';
+	var setResultList = function(a) {
+		try {
+			localStorage.setItem(resultKey, JSON.stringify(a));
+		} catch(e) {
+		}
+	};
+	var getResultList = function() {
+		try {
+			return JSON.parse(localStorage.getItem(resultKey));
+		} catch(e) {
+			return [];
+		}
+	};
+	var resetLists = function() {
+		setResultList([]);
+	};
 
+	resetLists();
+	var resultIndex = function() {
+		var resultList = getResultList();
+		return resultList.length;
+	}
+
+	// click start
+	$('.start').click(function(){
+		if(!isStopAnim) {
+			if(isStarted) {
+				isStopAnim = true;
+				rouletter.roulette('stop');	
+			} else {
+				isStarted = true;
+				$('.start').text('Stop');
+				rouletter.roulette('start');
+			}
+		}
+	});
+	// click stop
+	var stopEnd = function() {
+		isStarted = false;
+		isStopAnim = false;
+		var resultList = getResultList();
+		resultList.push(resultParam);
+		setResultList(resultList);
+
+		var i = resultIndex();
+		$('.start').text('Start');
+		addResult(i,resultParam);
+	};
+	$('.start').focus();
+	
+	// init reset button
+	$('.reset').click(function() {
+		if (confirm('Do you want to reset?')) {
+			resetLists();
+			resultsDiv.empty();
+			$('.start').focus();
+		}
+	});
+
+	// init number list and storage
 	var resultKey = 'janken.resultlist';
 	var setResultList = function(a) {
 		try {
@@ -39,64 +121,5 @@
 
 	// initialize
 	resetLists();
-
-	var getNumberRamdom = function(){
-		var numberList = numberListAll;
-		var i = Math.floor(Math.random() * numberList.length);
-		return numberList[i];
-	};
-	var resultIndex = function() {
-		var resultList = getResultList();
-		return resultList.length;
-	}
-	var resultNumberRamdom = function(){
-		var numberList = numberListAll;
-		var i = Math.floor(Math.random() * numberList.length);
-		var result = numberList[i];
-		var resultList = getResultList();
-		resultList.push(result);
-		setResultList(resultList);
-		return result
-	};
 	
-	var isStarted = false;
-	function randomFunc() {
-		if(isStarted) {
-			jankenImg.attr("src",toJankenSrc(getNumberRamdom()));
-			setTimeout(randomFunc, 50);
-		}
-	} 
-	var stop = function(time) {
-		isStarted = false;
-		startButton.text('Start');
-		var n = resultNumberRamdom();
-		var i = resultIndex();
-		jankenImg.attr("src",toJankenSrc(n));
-		addResult(i,n);
-	};
-	var start = function(){
-		isStarted = true;
-		startButton.text('Stop');
-		randomFunc();
-	};
-	// click the start
-	var startClicked = function(e){
-		if(isStarted) {
-			stop(null);
-		} else {
-			start();
-		}
-	};
-	startButton.click(startClicked); // button
-	startButton.focus();
-	
-	// init reset button
-	var resetClicked = function() {
-		if (confirm('Do you want to reset?')) {
-			resetLists();
-			jankenImg.attr("src",toJankenSrc(0));
-			resultsDiv.empty();
-			startButton.focus();
-		}
-	};
-	resetButton.click(resetClicked);
+});
