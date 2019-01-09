@@ -22,6 +22,7 @@ Startボタンはクリックの他、スペースキーを押しても動作し
 ### 使用ライブラリ
 [jQuery](https://jquery.com/)
 [UIKit](https://getuikit.com/)
+[roulette](https://github.com/akira-kuriyama/roulette.js)
 
 ### 使用画像
 [いらすとや](https://www.irasutoya.com/)様
